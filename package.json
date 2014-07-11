@@ -1,0 +1,27 @@
+{
+  "name": "gulp-markdown-to-json",
+  "version": "0.0.0",
+  "description": "Parse Markdown + YAML, compile Markdown to HTML, wrap it all up in JSON.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sparkartgroupinc/gulp-markdown-to-json/issues"
+  },
+  "author": {
+    "name": "Eric Lanehart",
+    "email": "eric@sparkart.com",
+    "url": "http://developers.sparkart.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sparkartgroupinc/gulp-markdown-to-json.git"
+  },
+  "dependencies": {
+    "expand-hash": "^0.2.1",
+    "front-matter": "^0.2.0",
+    "gulp-util": "~2.2.0",
+    "marked": "~0.3.0",
+    "sort-object": "0.0.6",
+    "through2": "~0.4.0",
+    "util-extend": "^1.0.1"
+  }
+}
