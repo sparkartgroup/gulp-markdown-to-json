@@ -66,4 +66,15 @@ describe('tree', function(){
     });
   });
 
+  it('should represent the directory structure as a nested object', function( done ){
+    fs.src(fixture_path)
+      .pipe(gutil.buffer())
+      .pipe(markdown())
+      .on('data', function( file ){
+        var json = JSON.parse(file.contents.toString());
+        assert(json.blog.posts['oakland-activist']);
+      })
+      .on('finish', done);
+  });
+
 });

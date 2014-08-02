@@ -17,7 +17,7 @@ function parse( file, flatten ){
   if( file.isStream() ) return this.emit('error', streamingErr);
 
   if( file.isBuffer() ){
-    var path = file.relative.split('.').shift().replace('/','.');
+    var path = file.relative.split('.').shift().replace(/\//g, '.');
     var parsed = frontmatter(file.contents.toString());
 
     var data = {};
@@ -46,6 +46,7 @@ module.exports = function( config, marked_options ){
 
       input.forEach(function( file ){
         var file_data = JSON.parse( parse(file).contents.toString() );
+
         data = extend(file_data, data);
       });
 
