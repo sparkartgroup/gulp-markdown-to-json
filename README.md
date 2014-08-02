@@ -1,4 +1,4 @@
-# [gulp](http://gulpjs.com)-markdown-to-json
+# [gulp](http://gulpjs.com)-markdown-to-json ![CircleCI Status][circleci]
 
  - Parse YAML front matter and Markdown body content with [front-matter][front-matter]
  - Compile Markdown to HTML with [marked][marked]
@@ -105,3 +105,4 @@ copyright &copy; 2014 sparkart group, inc.
 [handlebars]: https://github.com/wycats/handlebars.js
 [handlebars-iterate]: http://handlebarsjs.com/#iteration
 [solidus]: https://github.com/solidusjs
+[circleci]: https://circleci.com/gh/sparkartgroupinc/gulp-markdown-to-json.svg?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25

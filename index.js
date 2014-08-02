@@ -8,7 +8,7 @@ var expand = require('expand-hash');
 var frontmatter = require('front-matter');
 var marked = require('marked');
 
-const NAME = 'gulp-markdown-to-json';
+var NAME = 'gulp-markdown-to-json';
 var PluginError = gutil.PluginError;
 var streamingErr = new PluginError(NAME, 'Streaming not supported');
 
@@ -41,6 +41,8 @@ module.exports = function( config, marked_options ){
   marked.setOptions(options);
 
   var stream = through.obj(function( input, enc, callback ){
+    var file;
+
     if( util.isArray(input) ){
       var data = {};
 
@@ -57,15 +59,15 @@ module.exports = function( config, marked_options ){
         ? config
         : 'content.json';
 
-      var file = new gutil.File({
+      file = new gutil.File({
         base: '/',
         cwd: '/',
         path: '/' + name,
         contents: new Buffer(json)
       });
+    } else {
+      file = parse(input, true);
     }
-
-    if( !util.isArray(input) ) var file = parse(input, true);
 
     this.push(file);
     callback();

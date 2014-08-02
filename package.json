@@ -15,6 +15,9 @@
     "type": "git",
     "url": "https://github.com/sparkartgroupinc/gulp-markdown-to-json.git"
   },
+  "scripts": {
+    "test": "jshint index.js; mocha test/test.js"
+  },
   "dependencies": {
     "expand-hash": "^0.2.1",
     "front-matter": "^0.2.0",
@@ -25,6 +28,6 @@
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
-    "vinyl-fs": "^0.3.5"
+    "vinyl-fs": "~0.3.5"
   }
 }
