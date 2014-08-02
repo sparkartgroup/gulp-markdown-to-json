@@ -8,15 +8,15 @@ var Readable = require('stream').Readable;
 var markdown = require('../index');
 
 var fixture_path = './test/fixtures/**/*.md';
-var fixture_content = new Buffer('---\ntitle: lipsum ipsum\n---\n*dipsum*');
+var fixture_config = {
+  path: 'fixture.md',
+  contents: new Buffer('---\ntitle: lipsum ipsum\n---\n*"dipsum"*')
+};
 
 describe('parser', function(){
 
   it('should parse Markdown content and return markup wrapped in JSON', function( done ){
-    var fixture = new gutil.File({
-      path: 'fixture.md',
-      contents: fixture_content
-    });
+    var fixture = new gutil.File(fixture_config);
 
     markdown()
       .on('data', function( file ){
@@ -26,11 +26,21 @@ describe('parser', function(){
       .write(fixture);
   });
 
+  it('should pass on configuration objects to the marked module', function( done ){
+    var fixture = new gutil.File(fixture_config);
+
+    markdown({
+      smartypants: true
+    })
+    .on('data', function( file ){
+      assert(file.contents.toString().match(/“/));
+      done();
+    })
+    .write(fixture);
+  });
+
   it('should parse YAML front matter and merge keys', function( done ){
-    var fixture = new gutil.File({
-      path: 'fixture.md',
-      contents: fixture_content
-    });
+    var fixture = new gutil.File(fixture_config);
 
     markdown()
       .on('data', function( file ){
@@ -62,6 +72,20 @@ describe('tree', function(){
     stream.on('finish', function(){
       assert.equal(stream._readableState.length, 1);
       assert.equal(stream._readableState.buffer[0].path, '/content.json');
+      done();
+    });
+  });
+
+  it('should allow the single file to be renamed', function( done ){
+    var stream = fs.src(fixture_path)
+      .pipe(gutil.buffer())
+      .pipe(markdown('blog.json', {
+        smartypants: true
+      }));
+
+    stream.on('finish', function(){
+      assert.equal(stream._readableState.buffer[0].path, '/blog.json');
+      assert(stream._readableState.buffer[0].contents.toString().match(/“/));
       done();
     });
   });

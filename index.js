@@ -52,7 +52,10 @@ module.exports = function( config, marked_options ){
 
       var tree = sort(expand(data));
       var json = JSON.stringify(tree);
-      var name = (config && typeof config === 'string') || 'content.json';
+
+      var name = config && typeof config === 'string'
+        ? config
+        : 'content.json';
 
       var file = new gutil.File({
         base: '/',

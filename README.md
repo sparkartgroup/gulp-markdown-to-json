@@ -2,7 +2,7 @@
 
  - Parse YAML front matter and Markdown body content with [front-matter][front-matter]
  - Compile Markdown to HTML with [marked][marked]
- - Wrap all up in JSON — goes great with [Handlebars.js][handlebars] and [solidus][solidus]
+ - Wrap it all up in JSON — goes great with [Handlebars.js][handlebars] and [solidus][solidus]
 
 
 install :traffic_light:
@@ -24,7 +24,7 @@ var gulp = require('gulp');
 var markdown = require('gulp-markdown-to-json');
     gulp.task('markdown', function(){
       gulp.src('./content/**/*.md')
-        .pipe(markdown({
+        .pipe(markdown('blog.json', {
             pedantic: true,
             smartypants: true
         }))
@@ -56,7 +56,7 @@ var markdown = require('gulp-markdown-to-json');
 
 ### single file style
 
-Gather up the Markdown files beforehand with the [gulp-util buffer method][gulp-util] and the JSON will be output into a single file. This is especially handy for working with templates. Directory structure is preserved and represented as hierarchical JSON that’s easy to iterate with [Handlebars.js][handlebars-iterate] and friends.
+Gather up the Markdown files beforehand with the [gulp-util buffer method][gulp-util] and the JSON will be output into a single file. This is especially handy for working with templates. Directory structure is preserved and represented as nested JSON that’s easy to iterate with [Handlebars.js][handlebars-iterate] and friends.
 
 The output file is named **`content.json`** by default and optionally renamed:
 
