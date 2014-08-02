@@ -24,8 +24,10 @@ var gulp = require('gulp');
 var markdown = require('gulp-markdown-to-json');
     gulp.task('markdown', function(){
       gulp.src('./content/**/*.md')
-        .pipe(gutil.buffer())
-        .pipe(markdown('blog.json'))
+        .pipe(markdown({
+            pedantic: true,
+            smartypants: true
+        }))
         .pipe(gulp.dest('.'))
 });
 ```
@@ -66,10 +68,7 @@ var markdown = require('gulp-markdown-to-json');
 gulp.task('markdown', function(){
   gulp.src('./content/**/*.md')
     .pipe(gutil.buffer())
-    .pipe(markdown({
-        pedantic: true,
-        smartypants: true
-    }))
+    .pipe(markdown('blog.json'))
     .pipe(gulp.dest('.'))
 });
 ```
