@@ -24,7 +24,7 @@ var gulp = require('gulp');
 var markdown = require('gulp-markdown-to-json');
     gulp.task('markdown', function(){
       gulp.src('./content/**/*.md')
-        .pipe(markdown('blog.json', {
+        .pipe(markdown({
             pedantic: true,
             smartypants: true
         }))
@@ -49,7 +49,7 @@ var markdown = require('gulp-markdown-to-json');
     "slug": "bushwick-artisan",
     "title": "Wes Anderson pop-up Bushwick artisan", 
     "layout": "centered",
-    "body": ""
+    "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>"
 }
 ```
 
@@ -83,7 +83,7 @@ gulp.task('markdown', function(){
                 "slug": "bushwick-artisan",
                 "title": "Wes Anderson pop-up Bushwick artisan", 
                 "layout": "centered",
-                "body": ""
+                "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>"
             }
         },
         "mission": {
