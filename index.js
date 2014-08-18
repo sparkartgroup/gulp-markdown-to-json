@@ -20,9 +20,24 @@ function parse( file, flatten ){
     var path = file.relative.split('.').shift().replace(/\//g, '.');
     var parsed = frontmatter(file.contents.toString());
 
+    var body = parsed.body.split(/\n/);
+    var markup = marked(parsed.body).split(/\n/);
+
+    var title = markup[0].substr(0,3) === '<h1'
+      ? body[0]
+      : false;
+
     var data = {};
     data[path] = parsed.attributes;
-    data[path].body = marked(parsed.body);
+
+    if( title && !data[path].title ){
+      data[path].title = (title.substr(0,1) === '#')
+        ? title.substr(2)
+        : title;
+      data[path].body = markup.slice(1).join(/\n/);
+    } else {
+      data[path].body = marked(parsed.body);
+    }
 
     if( flatten ) data = data[path];
 
