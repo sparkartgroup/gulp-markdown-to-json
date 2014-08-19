@@ -34,7 +34,7 @@ function parse( file, flatten ){
       data[path].title = (title.substr(0,1) === '#')
         ? title.substr(2)
         : title;
-      data[path].body = markup.slice(1).join(/\n/);
+      data[path].body = markup.slice(1).join(' ');
     } else {
       data[path].body = marked(parsed.body);
     }
