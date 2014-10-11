@@ -17,7 +17,7 @@ function parse( file, flatten ){
   if( file.isStream() ) return this.emit('error', streamingErr);
 
   if( file.isBuffer() ){
-    var path = file.relative.split('.').shift().replace(/\//g, '.');
+    var path = file.relative.split('.').shift().replace(/[\/\\]/g, '.');
     var parsed = frontmatter(file.contents.toString());
 
     var body = parsed.body.split(/\n/);
