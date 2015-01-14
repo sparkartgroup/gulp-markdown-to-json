@@ -1,3 +1,4 @@
+---
 slug: blog
 title: ipsum dipsum
 layout: top

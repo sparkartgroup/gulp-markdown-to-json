@@ -34,6 +34,7 @@ var markdown = require('gulp-markdown-to-json');
 
 **`/blog/posts/bushwick-artisan.md`**
 
+    ---
     slug: bushwick-artisan
     title: Wes Anderson pop-up Bushwick artisan
     layout: centered
@@ -95,7 +96,7 @@ gulp.task('markdown', function(){
 
 ----
 **[MIT](LICENSE) LICENSE** <br>
-copyright &copy; 2014 sparkart group, inc.
+copyright &copy; 2015 sparkart group, inc.
 
 
 [gulp-util]: https://github.com/gulpjs/gulp-util#buffercb

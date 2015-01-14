@@ -1,3 +1,4 @@
+---
 slug: oakland-activist
 title: Epic Beard Man pop-up Oakland activist
 layout: left

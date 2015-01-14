@@ -1,3 +1,4 @@
+---
 slug: bushwick-artisan
 title: Wes Anderson pop-up Bushwick artisan
 layout: centered
