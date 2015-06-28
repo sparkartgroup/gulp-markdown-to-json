@@ -12,13 +12,21 @@ var NAME = 'gulp-markdown-to-json';
 var PluginError = gutil.PluginError;
 var streamingErr = new PluginError(NAME, 'Streaming not supported');
 
+function isJSON(str) {
+  try { JSON.parse(str); }
+  catch (e) { return false; }
+  return true;
+}
+
 function parse( file, flatten ){
   if( file.isNull() ) return;
   if( file.isStream() ) return this.emit('error', streamingErr);
 
   if( file.isBuffer() ){
+    var fileContents = file.contents.toString();
+    if (isJSON(fileContents)) return file;
     var path = file.relative.split('.').shift().replace(/\//g, '.');
-    var parsed = frontmatter(file.contents.toString());
+    var parsed = frontmatter(fileContents);
 
     var body = parsed.body.split(/\n/);
     var markup = marked(parsed.body).split(/\n/);
