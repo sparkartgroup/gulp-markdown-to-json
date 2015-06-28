@@ -3,7 +3,6 @@ var extend = require('util-extend');
 var sort = require('sort-object');
 var through = require('through2');
 var util = require('util');
-var validator = require('validator');
 
 var expand = require('expand-hash');
 var frontmatter = require('front-matter');
@@ -13,13 +12,19 @@ var NAME = 'gulp-markdown-to-json';
 var PluginError = gutil.PluginError;
 var streamingErr = new PluginError(NAME, 'Streaming not supported');
 
+function isJSON(str) {
+  try { JSON.parse(str); }
+  catch (e) { return false; }
+  return true;
+}
+
 function parse( file, flatten ){
   if( file.isNull() ) return;
   if( file.isStream() ) return this.emit('error', streamingErr);
 
   if( file.isBuffer() ){
     var fileContents = file.contents.toString();
-    if (validator.isJSON(fileContents)) return file;
+    if (isJSON(fileContents)) return file;
     var path = file.relative.split('.').shift().replace(/\//g, '.');
     var parsed = frontmatter(fileContents);
 
