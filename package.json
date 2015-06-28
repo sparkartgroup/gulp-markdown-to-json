@@ -42,7 +42,8 @@
     "marked": "^0.3.0",
     "sort-object": "^0.0.6",
     "through2": "^0.4.0",
-    "util-extend": "^1.0.1"
+    "util-extend": "^1.0.1",
+    "validator": "^3.40.1"
   },
   "devDependencies": {
     "vinyl-fs": "~0.3.5"

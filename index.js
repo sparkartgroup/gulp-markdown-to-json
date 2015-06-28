@@ -3,6 +3,7 @@ var extend = require('util-extend');
 var sort = require('sort-object');
 var through = require('through2');
 var util = require('util');
+var validator = require('validator');
 
 var expand = require('expand-hash');
 var frontmatter = require('front-matter');
@@ -17,8 +18,10 @@ function parse( file, flatten ){
   if( file.isStream() ) return this.emit('error', streamingErr);
 
   if( file.isBuffer() ){
+    var fileContents = file.contents.toString();
+    if (validator.isJSON(fileContents)) return file;
     var path = file.relative.split('.').shift().replace(/\//g, '.');
-    var parsed = frontmatter(file.contents.toString());
+    var parsed = frontmatter(fileContents);
 
     var body = parsed.body.split(/\n/);
     var markup = marked(parsed.body).split(/\n/);
