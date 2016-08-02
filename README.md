@@ -1,4 +1,7 @@
-# [gulp](http://gulpjs.com)-markdown-to-json ![CircleCI Status][circleci]
+[![CircleCI Status][circleci-badge]][circleci]
+[![Semistandard Style][semistandard-badge]][semistandard]
+
+# [gulp](http://gulpjs.com)-markdown-to-json
 
  - Parse YAML front matter and Markdown body content with [front-matter][front-matter]
  - Compile Markdown to HTML with [marked][marked]
@@ -22,7 +25,7 @@ Like any self-respecting gulp plugin, transformed source files will flow onward 
 ```javascript
 var gulp = require('gulp');
 var markdown = require('gulp-markdown-to-json');
-    gulp.task('markdown', function(){
+    gulp.task('markdown', function () {
       gulp.src('./content/**/*.md')
         .pipe(markdown({
             pedantic: true,
@@ -66,7 +69,7 @@ var gulp = require('gulp');
 var gutil = require('gulp-util');
 var markdown = require('gulp-markdown-to-json');
 
-gulp.task('markdown', function(){
+gulp.task('markdown', function () {
   gulp.src('./content/**/*.md')
     .pipe(gutil.buffer())
     .pipe(markdown('blog.json'))
@@ -106,4 +109,9 @@ copyright &copy; 2015 sparkart group, inc.
 [handlebars]: https://github.com/wycats/handlebars.js
 [handlebars-iterate]: http://handlebarsjs.com/#iteration
 [solidus]: https://github.com/solidusjs
-[circleci]: https://circleci.com/gh/SparkartGroupInc/gulp-markdown-to-json.png?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25
+
+[circleci]: https://circleci.com/gh/SparkartGroupInc/gulp-markdown-to-json
+[circleci-badge]: https://circleci.com/gh/SparkartGroupInc/gulp-markdown-to-json.png?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25
+
+[semistandard]: https://github.com/Flet/semistandard
+[semistandard-badge]: https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat

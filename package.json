@@ -19,7 +19,8 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "jshint index.js; mocha test/test.js"
+		"lint": "semistandard **/*.js",
+    "test": "mocha test/test.js"
   },
   "files": [
     "index.js"
@@ -45,6 +46,7 @@
     "util-extend": "^1.0.1"
   },
   "devDependencies": {
+    "semistandard": "^8.0.0",
     "vinyl-fs": "~0.3.5"
   }
 }
