@@ -61,7 +61,7 @@ module.exports = function (config, marked_options) {
     if (util.isArray(input)){
       var data = {};
 
-      input.forEach(function (file) {
+      input.forEach(file => {
         const file_data = JSON.parse(parse(file).contents.toString());
 
         data = extend(file_data, data);

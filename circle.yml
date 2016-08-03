@@ -1,3 +1,7 @@
 machine:
   node:
-    version: v0.10
+    version: v4.4.7
+dependencies:
+  # https://discuss.circleci.com/t/testing-multiple-versions-of-node/542
+  pre:
+    - case $CIRCLE_NODE_INDEX in 0) NODE_VERSION=4 ;; 1) NODE_VERSION=6 ;; esac; nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
