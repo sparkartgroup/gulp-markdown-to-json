@@ -1,7 +1,9 @@
-const assert = require('assert');
+const expect = require('expect');
 const fs = require('vinyl-fs');
 const gutil = require('gulp-util');
+const Lab = require('lab');
 
+const lab = exports.lab = Lab.script();
 const markdown = require('../index');
 
 const fixturePath = './test/fixtures/**/*.md';
@@ -20,103 +22,103 @@ const fixtureConfig = [{
   contents: new Buffer('---\ntitle: lipsum ipsum\n---\n# Titulus\n*"tipsum"*')
 }];
 
-describe('parser', function () {
-  it('should parse Markdown content and return markup wrapped in JSON', function (done) {
+lab.experiment('Markdown and YAML parsing', function () {
+  lab.test('should parse Markdown content and return markup wrapped in JSON', function (done) {
     const fixture = new gutil.File(fixtureConfig[0]);
 
     markdown()
       .on('data', function (file) {
-        assert(JSON.parse(file.contents.toString()));
+        expect(JSON.parse(file.contents.toString()));
         done();
       })
       .write(fixture);
   });
 
-  it('should pass on configuration objects to the marked module', function (done) {
+  lab.test('should pass on configuration objects to the marked module', function (done) {
     const fixture = new gutil.File(fixtureConfig[0]);
 
     markdown({
       smartypants: true
     })
     .on('data', function (file) {
-      assert(file.contents.toString().match(/“/));
+      expect(file.contents.toString().match(/“/));
       done();
     })
     .write(fixture);
   });
 
-  it('should parse YAML front matter and merge keys', function (done) {
+  lab.test('should parse YAML front matter and merge keys', function (done) {
     const fixture = new gutil.File(fixtureConfig[0]);
 
     markdown()
       .on('data', function (file) {
         const json = JSON.parse(file.contents.toString());
-        assert(json.title);
+        expect(json.title);
         done();
       })
       .write(fixture);
   });
 
-  it('should extract a title if first line of Markdown is an atx-style h1', function (done) {
+  lab.test('should extract a title if first line of Markdown is an atx-style h1', function (done) {
     const fixture = new gutil.File(fixtureConfig[1]);
 
     markdown()
       .on('data', function (file) {
         const json = JSON.parse(file.contents.toString());
-        assert(json.title && json.title === 'Titulus');
+        expect(json.title && json.title === 'Titulus');
         done();
       })
       .write(fixture);
   });
 
-  it('should extract a title if first line of Markdown is a setext-style h1', function (done) {
+  lab.test('should extract a title if first line of Markdown is a setext-style h1', function (done) {
     const fixture = new gutil.File(fixtureConfig[2]);
 
     markdown()
       .on('data', function (file) {
         const json = JSON.parse(file.contents.toString());
-        assert(json.title && json.title === 'Titulus');
+        expect(json.title && json.title === 'Titulus');
         done();
       })
       .write(fixture);
   });
 
-  it('should prefer YAML front matter titles over a extracted Markdown h1', function (done) {
+  lab.test('should prefer YAML front matter titles over a extracted Markdown h1', function (done) {
     const fixture = new gutil.File(fixtureConfig[3]);
 
     markdown()
       .on('data', function (file) {
         const json = JSON.parse(file.contents.toString());
-        assert(json.title && json.title === 'lipsum ipsum');
+        expect(json.title && json.title === 'lipsum ipsum');
         done();
       })
       .write(fixture);
   });
 });
 
-describe('tree', function () {
-  it('should return JSON for all Markdown in a specified directory structure', function (done) {
+lab.experiment('Output', function () {
+  lab.test('should return JSON for all Markdown in a specified directory structure', function (done) {
     fs.src(fixturePath)
       .pipe(markdown())
       .on('data', function (file) {
-        assert(JSON.parse(file.contents.toString()));
+        expect(JSON.parse(file.contents.toString()));
       })
       .on('finish', done);
   });
 
-  it('should consolidate output into a single file if buffered with gulp-util', function (done) {
+  lab.test('should consolidate output into a single file if buffered with gulp-util', function (done) {
     const stream = fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown());
 
     stream.on('finish', function () {
-      assert.equal(stream._readableState.length, 1);
-      assert.equal(stream._readableState.buffer[0].path, '/content.json');
+      expect(stream._readableState.length).toEqual(1);
+      expect(stream._readableState.buffer[0].path).toEqual('/content.json');
       done();
     });
   });
 
-  it('should allow the single file to be renamed', function (done) {
+  lab.test('should allow the single file to be renamed', function (done) {
     const stream = fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown('blog.json', {
@@ -124,19 +126,19 @@ describe('tree', function () {
       }));
 
     stream.on('finish', function () {
-      assert.equal(stream._readableState.buffer[0].path, '/blog.json');
-      assert(stream._readableState.buffer[0].contents.toString().match(/“/));
+      expect(stream._readableState.buffer[0].path).toEqual('/blog.json');
+      expect(stream._readableState.buffer[0].contents.toString()).toInclude('“');
       done();
     });
   });
 
-  it('should represent the directory structure as a nested object', function (done) {
+  lab.test('should represent the directory structure as a nested object', function (done) {
     fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown())
       .on('data', function (file) {
         const json = JSON.parse(file.contents.toString());
-        assert(json.blog.posts['oakland-activist']);
+        expect(json.blog.posts['oakland-activist']);
       })
       .on('finish', done);
   });
