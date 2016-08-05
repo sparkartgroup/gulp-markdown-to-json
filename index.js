@@ -12,13 +12,25 @@ const NAME = 'gulp-markdown-to-json';
 const PluginError = gutil.PluginError;
 const streamingErr = new PluginError(NAME, 'Streaming not supported');
 
-function parse (file, flatten) {
+function parseError(message, file, line, column) {
+  return new PluginError(NAME, `${message}
+    ${(file.relative)}:${line}:${column}
+    ${file.contents.toString().split('\n')[line]}
+    ${' '.repeat(column)}^\n`);
+}
+
+function parse(file, flatten) {
   if (file.isNull()) return;
   if (file.isStream()) return this.emit('error', streamingErr);
 
   if (file.isBuffer()) {
     const path = file.relative.split('.').shift().replace(/[\/\\]/g, '.');
-    const parsed = frontmatter(file.contents.toString());
+
+    try {
+       var parsed = frontmatter(file.contents.toString());
+    } catch(err) {
+        throw parseError(`[${err.name}]: ${err.reason}`, file, err.mark.line, err.mark.column);
+    }
 
     const body = parsed.body.split(/\n/);
     const markup = marked(parsed.body).split(/\n/);
@@ -57,34 +69,39 @@ module.exports = function (config, marked_options) {
 
   const stream = through.obj(function (input, enc, callback) {
     var file;
+    try {
+      if (util.isArray(input)){
+        var data = {};
 
-    if (util.isArray(input)){
-      var data = {};
+        input.forEach(file => {
+          const file_data = JSON.parse(parse(file).contents.toString());
 
-      input.forEach(file => {
-        const file_data = JSON.parse(parse(file).contents.toString());
+          data = extend(file_data, data);
+        });
 
-        data = extend(file_data, data);
-      });
+        const tree = sort(expand(data));
+        const json = JSON.stringify(tree);
 
-      const tree = sort(expand(data));
-      const json = JSON.stringify(tree);
+        const name = config && typeof config === 'string'
+          ? config
+          : 'content.json';
 
-      const name = config && typeof config === 'string'
-        ? config
-        : 'content.json';
+        file = new gutil.File({
+          base: '/',
+          cwd: '/',
+          path: '/' + name,
+          contents: new Buffer(json)
+        });
+      } else {
+        file = parse(input, true);
+      }
 
-      file = new gutil.File({
-        base: '/',
-        cwd: '/',
-        path: '/' + name,
-        contents: new Buffer(json)
-      });
-    } else {
-      file = parse(input, true);
+      this.push(file);
+
+    } catch(err) {
+      console.log(err.toString());
     }
 
-    this.push(file);
     callback();
   });
 
