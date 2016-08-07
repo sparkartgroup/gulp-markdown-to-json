@@ -1,7 +1,8 @@
 const expect = require('expect');
-const fs = require('vinyl-fs');
+const vfs = require('vinyl-fs');
 const gutil = require('gulp-util');
 const Lab = require('lab');
+const Path = require('path');
 
 const lab = exports.lab = Lab.script();
 const markdown = require('../index');
@@ -101,6 +102,51 @@ Object.keys(testConfigs).forEach(configName => {
         })
         .write(fixture);
     });
+  });
+});
+
+lab.experiment('Arguments API', () => {
+  var config;
+
+  lab.beforeEach(done => {
+    config = testConfigs['marked'];
+    done();
+  });
+
+  lab.test('rename consolidated output file', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown(config, 'blog.json'))
+      .on('data', file => expect(Path.basename(file.path)).toEqual('blog.json'))
+      .on('finish', done);
+  });
+
+  lab.test('pass a transform function', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown(config, 'blog.json', (data, file) => {
+        data.test = true;
+        return data;
+      }))
+      .on('data', file => {
+        expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true)
+        expect(Path.basename(file.path)).toEqual('blog.json')
+      })
+      .on('finish', done);
+  });
+
+  lab.test('optional filename', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown(config, (data, file) => {
+        data.test = true;
+        return data;
+      }))
+      .on('data', file => {
+        expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true)
+        expect(Path.basename(file.path)).toEqual('content.json')
+      })
+      .on('finish', done);
   });
 });
 
@@ -252,7 +298,7 @@ lab.experiment('Transform function', () => {
   });
 
   lab.test('consolidated output file uses objects returned by transform function', done => {
-    const stream = fs.src(fixturePath)
+    const stream = vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config));
 
@@ -274,16 +320,14 @@ lab.experiment('Output', () => {
   });
 
   lab.test('returns JSON for all Markdown in a specified directory structure', done => {
-    fs.src(fixturePath)
+    vfs.src(fixturePath)
       .pipe(markdown(config))
-      .on('data', file => {
-        expect(JSON.parse(file.contents.toString()));
-      })
+      .on('data', file => expect(JSON.parse(file.contents.toString())))
       .on('finish', done);
   });
 
   lab.test('consolidates output into a single file if buffered with gulp-util', done => {
-    const stream = fs.src(fixturePath)
+    const stream = vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config));
 
@@ -295,19 +339,15 @@ lab.experiment('Output', () => {
   });
 
   lab.test('allows consolidated file to be renamed', done => {
-    const stream = fs.src(fixturePath)
+    vfs.src(fixturePath)
       .pipe(gutil.buffer())
-      .pipe(markdown(config, 'blog.json'));
-
-    stream.on('finish', () => {
-      expect(stream._readableState.buffer[0].path).toEqual('/blog.json');
-      expect(stream._readableState.buffer[0].contents.toString()).toInclude('<h2');
-      done();
-    });
+      .pipe(markdown(config, 'blog.json'))
+      .on('data', file => expect(Path.basename(file.path)).toEqual('blog.json'))
+      .on('finish', done);
   });
 
   lab.test('represents the directory structure as a nested object', done => {
-    fs.src(fixturePath)
+    vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config))
       .on('data', file => {
