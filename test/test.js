@@ -2,6 +2,7 @@ const expect = require('expect');
 const fs = require('vinyl-fs');
 const gutil = require('gulp-util');
 const Lab = require('lab');
+const through = require('through2');
 
 const lab = exports.lab = Lab.script();
 const markdown = require('../index');
@@ -43,26 +44,44 @@ const testConfigs = {
 
 const fixturePath = './test/fixtures/**/*.md';
 
-const fixtureConfig = [{
-  path: 'fixture.md',
-  contents: new Buffer('---\ntitle: lipsum ipsum\n---\n*"dipsum"*')
-}, {
-  path: 'fixture.md',
-  contents: new Buffer('# Titulus\n*"tipsum"*')
-}, {
-  path: 'fixture.md',
-  contents: new Buffer('Titulus\n=======\n*"tipsum"*')
-}, {
-  path: 'fixture.md',
-  contents: new Buffer('---\ntitle: lipsum ipsum\n---\n# Titulus\n*"tipsum"*')
-}];
+const fixtureConfig = {
+  frontmatter: {
+    path: 'fixture.md',
+    contents: new Buffer('---\ntitle: lipsum ipsum\n---\n*"dipsum"*')
+  },
+  atxHeading: {
+    path: 'fixture.md',
+    contents: new Buffer('# Titulus\n*"tipsum"*')
+  },
+  setextHeading: {
+    path: 'fixture.md',
+    contents: new Buffer('Titulus\n=======\n*"tipsum"*')
+  },
+  untitled: {
+    path: 'fixture.md',
+    contents: new Buffer('*tipsum dipsum*')
+  },
+  multipleTitles: {
+    path: 'fixture.md',
+    contents: new Buffer('---\ntitle: lipsum ipsum\n---\n# Titulus\n*"tipsum"*')
+  },
+  multipleH1: {
+    path: 'fixture.md',
+    contents: new Buffer('# lipsum ipsum\n\n# Titulus tipsum')
+  }
+};
 
 Object.keys(testConfigs).forEach(configName => {
   lab.experiment(`Markdown and YAML parsing (${configName})`, () => {
-    const config = testConfigs[configName];
+    var config;
 
-    lab.test('should parse Markdown content and return markup wrapped in JSON', function (done) {
-      const fixture = new gutil.File(fixtureConfig[0]);
+    lab.beforeEach(done => {
+      config = testConfigs[configName];
+      done();
+    });
+
+    lab.test('parses Markdown content and returns markup wrapped in JSON', function (done) {
+      const fixture = new gutil.File(fixtureConfig.frontmatter);
 
       markdown(config)
         .on('data', file => {
@@ -72,8 +91,8 @@ Object.keys(testConfigs).forEach(configName => {
         .write(fixture);
     });
 
-    lab.test('should parse YAML front matter and merge keys', done => {
-      const fixture = new gutil.File(fixtureConfig[0]);
+    lab.test('parses YAML front matter and merges keys', done => {
+      const fixture = new gutil.File(fixtureConfig.frontmatter);
 
       markdown(config)
         .on('data', file => {
@@ -83,49 +102,179 @@ Object.keys(testConfigs).forEach(configName => {
         })
         .write(fixture);
     });
+  });
+});
 
-    lab.test('should extract a title if first line of Markdown is an atx-style h1', done => {
-      const fixture = new gutil.File(fixtureConfig[1]);
+lab.experiment('Title extraction', () => {
+  var config;
 
-      markdown(config)
-        .on('data', file => {
-          const json = JSON.parse(file.contents.toString());
-          expect(json.title && json.title === 'Titulus');
-          done();
-        })
-        .write(fixture);
-    });
+  lab.beforeEach(done => {
+    config = testConfigs['marked'];
+    done();
+  });
 
-    lab.test('should extract a title if first line of Markdown is a setext-style h1', done => {
-      const fixture = new gutil.File(fixtureConfig[2]);
+  lab.test('does nothing if no h1 is found', done => {
+    const fixture = new gutil.File(fixtureConfig.untitled);
 
-      markdown(config)
-        .on('data', file => {
-          const json = JSON.parse(file.contents.toString());
-          expect(json.title && json.title === 'Titulus');
-          done();
-        })
-        .write(fixture);
-    });
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json).toExcludeKey('title');
+        done();
+      })
+      .write(fixture);
+  });
 
-    lab.test('should prefer YAML front matter titles over a extracted Markdown h1', done => {
-      const fixture = new gutil.File(fixtureConfig[3]);
+  lab.test('extracts a title from the first atx-style h1', done => {
+    const fixture = new gutil.File(fixtureConfig.atxHeading);
 
-      markdown(config)
-        .on('data', file => {
-          const json = JSON.parse(file.contents.toString());
-          expect(json.title && json.title === 'lipsum ipsum');
-          done();
-        })
-        .write(fixture);
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'Titulus');
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('extracts a title from the first setext-style h1', done => {
+    const fixture = new gutil.File(fixtureConfig.setextHeading);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'Titulus');
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('uses the first h1 found', done => {
+    const fixture = new gutil.File(fixtureConfig.multipleH1);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'lipsum ipsum');
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('prefers YAML front matter titles over an extracted Markdown h1', done => {
+    const fixture = new gutil.File(fixtureConfig.multipleTitles);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'lipsum ipsum');
+        done();
+      })
+      .write(fixture);
+  });
+});
+
+lab.experiment('Title stripping', () => {
+  var config;
+
+  lab.beforeEach(done => {
+    config = {
+      renderer: testConfigs['marked'],
+      stripTitle: true
+    };
+    done();
+  });
+
+  lab.test('does nothing if stripTitle option is unspecified', done => {
+    const fixture = new gutil.File(fixtureConfig.atxHeading);
+
+    markdown(testConfigs['marked'])
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.body).toInclude('<h1 id="titulus">Titulus</h1>');
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('strips the first h1 found', done => {
+    const fixture = new gutil.File(fixtureConfig.multipleH1);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'lipsum ipsum');
+        expect(json.body).toExclude('<h1 id="lipsum-ipsum">lipsum ipsum</h1>');
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('does not strip title if YAML-specified title is used', done => {
+    const fixture = new gutil.File(fixtureConfig.multipleTitles);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.body).toInclude('<h1 id="titulus">Titulus</h1>');
+        done();
+      })
+      .write(fixture);
+  });
+});
+
+lab.experiment('Transform function', () => {
+  var config;
+
+  lab.beforeEach(done => {
+    config = {
+      renderer: testConfigs['marked'],
+      transform: (data, file) => {
+        delete data.body;
+        data.path = file.path;
+        return data;
+      }
+    };
+    done();
+  });
+
+  lab.test('output file uses object returned by transform function', done => {
+    const fixture = new gutil.File(fixtureConfig.frontmatter);
+
+    markdown(config)
+      .on('data', file => {
+        const json = JSON.parse(file.contents.toString());
+        expect(json.title && json.title === 'lipsum ipsum');
+        expect(json.body).toNotExist();
+        expect(json.path).toExist();
+        done();
+      })
+      .write(fixture);
+  });
+
+  lab.test('consolidated output file uses objects returned by transform function', done => {
+    const stream = fs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown(config));
+
+    stream.on('data', file => {
+      const json = JSON.parse(file.contents.toString());
+      expect(json.blog.posts['bushwick-artisan'].body).toNotExist();
+      expect(json.blog.posts['bushwick-artisan'].path).toExist();
+      done();
     });
   });
 });
 
 lab.experiment('Output', () => {
-  const config = testConfigs['marked'];
+  var config;
 
-  lab.test('should return JSON for all Markdown in a specified directory structure', done => {
+  lab.beforeEach(done => {
+    config = config = testConfigs['marked'];
+    done();
+  });
+
+  lab.test('returns JSON for all Markdown in a specified directory structure', done => {
     fs.src(fixturePath)
       .pipe(markdown(config))
       .on('data', file => {
@@ -134,7 +283,7 @@ lab.experiment('Output', () => {
       .on('finish', done);
   });
 
-  lab.test('should consolidate output into a single file if buffered with gulp-util', done => {
+  lab.test('consolidates output into a single file if buffered with gulp-util', done => {
     const stream = fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config));
@@ -146,7 +295,7 @@ lab.experiment('Output', () => {
     });
   });
 
-  lab.test('should allow the single file to be renamed', done => {
+  lab.test('allows consolidated file to be renamed', done => {
     const stream = fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config, 'blog.json'));
@@ -158,7 +307,7 @@ lab.experiment('Output', () => {
     });
   });
 
-  lab.test('should represent the directory structure as a nested object', done => {
+  lab.test('represents the directory structure as a nested object', done => {
     fs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config))

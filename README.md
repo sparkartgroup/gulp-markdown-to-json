@@ -138,16 +138,60 @@ gulp.task('markdown', () => {
 }
 ```
 
+### Title Extraction and Stripping
+
+Define titles as `title` in the YAML frontmatter. Text of the first `<h1>` is assigned to `title` automatically if this is not specified.
+
+Specify `stripTitle: true` in the config object to remove the first `<h1>` from the body. Use this if you are displaying the title outside of the body, in a page header for example.
+
+**`/blog/posts/bushwick-artisan.md`**
+
+```md
+Wes Anderson pop-up Bushwick artisan
+====================================
+
+## YOLO
+Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.
+```
+
+**`/blog/posts/bushwick-artisan.json`**
+
+```json
+{
+  "title": "Wes Anderson pop-up Bushwick artisan", 
+  "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>"
+}
+```
+
+### Transforms
+
+If you would like to modify or add to the JSON data for each file, specify a transform function and return your desired object. This function is passed the default object as well as the [Vinyl file object][vinyl] for the source file.
+
+For example:
+
+```js
+gulp.src('./content/**/*.md')
+  .pipe(gutil.buffer())
+  .pipe(markdownToJSON(marked, 'blog.json', (data, file) => {
+    delete data.body;
+    data.path = file.path;
+    return data;
+  }))
+  .pipe(gulp.dest('.'))
+```
+
 API
 ---
 
-### `markdownToJSON((render: Function, filename?: String) | config: Object) => TransformStream`
+### `markdownToJSON((render: Function, name?: String, transform?: Function) | config: Object) => TransformStream`
 
 `config`
 
 - `render` `Function` accepts Markdown source string, returns an escaped HTML string. **Required**
 - `context` `Object` to use when calling `render`
 - `name` `String` to rename consolidated output file, if using. Default: `content.json`
+- `stripTitle` `Boolean` strips the first `<h1>` from body, if extracted as title. Default: `false`
+- `transform` `Function` to modify the JSON data for each file before outputting
 
 Contribute
 ----------
@@ -182,3 +226,5 @@ Copyright &copy; 2016 Sparkart Group, Inc.
 
 [gulp-util]: https://github.com/gulpjs/gulp-util#buffercb
 [handlebars-iterate]: http://handlebarsjs.com/#iteration
+
+[vinyl]: https://github.com/gulpjs/vinyl
