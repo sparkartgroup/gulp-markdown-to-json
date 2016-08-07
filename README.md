@@ -165,7 +165,7 @@ Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickle
 
 ### Transforms
 
-If you would like to modify or add to the JSON data for each file, specify a transform function and return your desired object. This function is passed the default object as well as the [Vinyl file object][vinyl] for the source file.
+To change or add to the JSON data for each file, specify a transform function and return your desired object. This function is passed the default data and the [Vinyl file object][vinyl] for the source file.
 
 For example:
 
@@ -191,7 +191,7 @@ API
 - `context` `Object` to use when calling `render`
 - `name` `String` to rename consolidated output file, if using. Default: `content.json`
 - `stripTitle` `Boolean` strips the first `<h1>` from body, if extracted as title. Default: `false`
-- `transform` `Function` to modify the JSON data for each file before outputting
+- `transform` `Function` to access and change the JSON data for each file before outputting
 
 Contribute
 ----------

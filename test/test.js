@@ -2,7 +2,6 @@ const expect = require('expect');
 const fs = require('vinyl-fs');
 const gutil = require('gulp-util');
 const Lab = require('lab');
-const through = require('through2');
 
 const lab = exports.lab = Lab.script();
 const markdown = require('../index');
