@@ -1,8 +1,10 @@
 const expect = require('expect');
-const vfs = require('vinyl-fs');
 const gutil = require('gulp-util');
 const Lab = require('lab');
 const Path = require('path');
+const PluginError = require('gulp-util').PluginError;
+const vfs = require('vinyl-fs');
+const Vinyl = require('gulp-util').File;
 
 const lab = exports.lab = Lab.script();
 const markdown = require('../index');
@@ -42,7 +44,7 @@ const testConfigs = {
   }
 };
 
-const fixturePath = './test/fixtures/**/*.md';
+const fixturePath = './test/fixtures/**/*';
 
 const fixtureConfig = {
   frontmatter: {
@@ -68,6 +70,10 @@ const fixtureConfig = {
   multipleH1: {
     path: 'fixture.md',
     contents: new Buffer('# lipsum ipsum\n\n# Titulus tipsum')
+  },
+  invalidYAML: {
+    path: 'fixture.md',
+    contents: new Buffer('---\ntitle: "lipsum "fragor" ipsum"\n---\n*"dipsum"*')
   }
 };
 
@@ -81,7 +87,7 @@ Object.keys(testConfigs).forEach(configName => {
     });
 
     lab.test('parses Markdown content and returns markup wrapped in JSON', function (done) {
-      const fixture = new gutil.File(fixtureConfig.frontmatter);
+      const fixture = new Vinyl(fixtureConfig.frontmatter);
 
       markdown(config)
         .on('data', file => {
@@ -92,12 +98,25 @@ Object.keys(testConfigs).forEach(configName => {
     });
 
     lab.test('parses YAML front matter and merges keys', done => {
-      const fixture = new gutil.File(fixtureConfig.frontmatter);
+      const fixture = new Vinyl(fixtureConfig.frontmatter);
 
       markdown(config)
         .on('data', file => {
           const json = JSON.parse(file.contents.toString());
           expect(json.title);
+          done();
+        })
+        .write(fixture);
+    });
+
+    lab.test('stream emits a PluginError with details from front-matter/js-yaml if YAML is invalid', done => {
+      const fixture = new Vinyl(fixtureConfig.invalidYAML);
+
+      markdown(config)
+        .on('error', err => {
+          expect(err instanceof PluginError).toBe(true);
+          expect(err.name).toEqual('YAMLException');
+          expect(err.stack).toInclude('line 2');
           done();
         })
         .write(fixture);
@@ -113,11 +132,13 @@ lab.experiment('Arguments API', () => {
     done();
   });
 
-  lab.test('rename consolidated output file', done => {
+  lab.test('rename consolidated file', done => {
     vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config, 'blog.json'))
-      .on('data', file => expect(Path.basename(file.path)).toEqual('blog.json'))
+      .on('data', file => {
+        if (Path.extname(file.path) === '.json') expect(Path.basename(file.path)).toEqual('blog.json');
+      })
       .on('finish', done);
   });
 
@@ -129,13 +150,15 @@ lab.experiment('Arguments API', () => {
         return data;
       }))
       .on('data', file => {
-        expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true)
-        expect(Path.basename(file.path)).toEqual('blog.json')
+        if (Path.extname(file.path) === '.json') {
+          expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true);
+          expect(Path.basename(file.path)).toEqual('blog.json');
+        }
       })
       .on('finish', done);
   });
 
-  lab.test('optional filename', done => {
+  lab.test('optional consolidated file rename', done => {
     vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config, (data, file) => {
@@ -143,8 +166,10 @@ lab.experiment('Arguments API', () => {
         return data;
       }))
       .on('data', file => {
-        expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true)
-        expect(Path.basename(file.path)).toEqual('content.json')
+        if (file.name === 'content.json') {
+          expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true);
+          expect(Path.basename(file.path)).toEqual('content.json');
+        }
       })
       .on('finish', done);
   });
@@ -159,7 +184,7 @@ lab.experiment('Title extraction', () => {
   });
 
   lab.test('does nothing if no h1 is found', done => {
-    const fixture = new gutil.File(fixtureConfig.untitled);
+    const fixture = new Vinyl(fixtureConfig.untitled);
 
     markdown(config)
       .on('data', file => {
@@ -171,7 +196,7 @@ lab.experiment('Title extraction', () => {
   });
 
   lab.test('extracts a title from the first atx-style h1', done => {
-    const fixture = new gutil.File(fixtureConfig.atxHeading);
+    const fixture = new Vinyl(fixtureConfig.atxHeading);
 
     markdown(config)
       .on('data', file => {
@@ -183,7 +208,7 @@ lab.experiment('Title extraction', () => {
   });
 
   lab.test('extracts a title from the first setext-style h1', done => {
-    const fixture = new gutil.File(fixtureConfig.setextHeading);
+    const fixture = new Vinyl(fixtureConfig.setextHeading);
 
     markdown(config)
       .on('data', file => {
@@ -195,7 +220,7 @@ lab.experiment('Title extraction', () => {
   });
 
   lab.test('uses the first h1 found', done => {
-    const fixture = new gutil.File(fixtureConfig.multipleH1);
+    const fixture = new Vinyl(fixtureConfig.multipleH1);
 
     markdown(config)
       .on('data', file => {
@@ -207,7 +232,7 @@ lab.experiment('Title extraction', () => {
   });
 
   lab.test('prefers YAML front matter titles over an extracted Markdown h1', done => {
-    const fixture = new gutil.File(fixtureConfig.multipleTitles);
+    const fixture = new Vinyl(fixtureConfig.multipleTitles);
 
     markdown(config)
       .on('data', file => {
@@ -231,7 +256,7 @@ lab.experiment('Title stripping', () => {
   });
 
   lab.test('does nothing if stripTitle option is unspecified', done => {
-    const fixture = new gutil.File(fixtureConfig.atxHeading);
+    const fixture = new Vinyl(fixtureConfig.atxHeading);
 
     markdown(testConfigs['marked'])
       .on('data', file => {
@@ -243,7 +268,7 @@ lab.experiment('Title stripping', () => {
   });
 
   lab.test('strips the first h1 found', done => {
-    const fixture = new gutil.File(fixtureConfig.multipleH1);
+    const fixture = new Vinyl(fixtureConfig.multipleH1);
 
     markdown(config)
       .on('data', file => {
@@ -256,7 +281,7 @@ lab.experiment('Title stripping', () => {
   });
 
   lab.test('does not strip title if YAML-specified title is used', done => {
-    const fixture = new gutil.File(fixtureConfig.multipleTitles);
+    const fixture = new Vinyl(fixtureConfig.multipleTitles);
 
     markdown(config)
       .on('data', file => {
@@ -284,7 +309,7 @@ lab.experiment('Transform function', () => {
   });
 
   lab.test('output file uses object returned by transform function', done => {
-    const fixture = new gutil.File(fixtureConfig.frontmatter);
+    const fixture = new Vinyl(fixtureConfig.frontmatter);
 
     markdown(config)
       .on('data', file => {
@@ -298,16 +323,17 @@ lab.experiment('Transform function', () => {
   });
 
   lab.test('consolidated output file uses objects returned by transform function', done => {
-    const stream = vfs.src(fixturePath)
+    vfs.src(fixturePath)
       .pipe(gutil.buffer())
-      .pipe(markdown(config));
+      .pipe(markdown(config))
+      .on('data', file => {
+        if (Path.extname(file.path) !== '.json') return;
 
-    stream.on('data', file => {
-      const json = JSON.parse(file.contents.toString());
-      expect(json.blog.posts['bushwick-artisan'].body).toNotExist();
-      expect(json.blog.posts['bushwick-artisan'].path).toExist();
-      done();
-    });
+        const json = JSON.parse(file.contents.toString());
+        expect(json.blog.posts['bushwick-artisan'].body).toNotExist();
+        expect(json.blog.posts['bushwick-artisan'].path).toExist();
+      })
+      .on('finish', done);
   });
 });
 
@@ -322,27 +348,33 @@ lab.experiment('Output', () => {
   lab.test('returns JSON for all Markdown in a specified directory structure', done => {
     vfs.src(fixturePath)
       .pipe(markdown(config))
-      .on('data', file => expect(JSON.parse(file.contents.toString())))
+      .pipe(gutil.buffer())
+      .on('data', files => {
+        const jsonFiles = files.filter(file => Path.extname(file.path) === '.json');
+        expect(jsonFiles.length).toEqual(3);
+      })
       .on('finish', done);
   });
 
   lab.test('consolidates output into a single file if buffered with gulp-util', done => {
-    const stream = vfs.src(fixturePath)
+    vfs.src(fixturePath)
       .pipe(gutil.buffer())
-      .pipe(markdown(config));
-
-    stream.on('finish', () => {
-      expect(stream._readableState.length).toEqual(1);
-      expect(stream._readableState.buffer[0].path).toEqual('/content.json');
-      done();
-    });
+      .pipe(markdown(config))
+      .pipe(gutil.buffer())
+      .on('data', files => {
+        const jsonFiles = files.filter(file => Path.extname(file.path) === '.json');
+        expect(jsonFiles.length).toEqual(1);
+      })
+      .on('finish', done);
   });
 
   lab.test('allows consolidated file to be renamed', done => {
     vfs.src(fixturePath)
       .pipe(gutil.buffer())
       .pipe(markdown(config, 'blog.json'))
-      .on('data', file => expect(Path.basename(file.path)).toEqual('blog.json'))
+      .on('data', file => {
+        if (Path.extname(file.path) === '.json') expect(Path.basename(file.path)).toEqual('blog.json');
+      })
       .on('finish', done);
   });
 
@@ -351,8 +383,10 @@ lab.experiment('Output', () => {
       .pipe(gutil.buffer())
       .pipe(markdown(config))
       .on('data', file => {
-        const json = JSON.parse(file.contents.toString());
-        expect(json.blog.posts['oakland-activist']);
+        if (file && file.name === 'content.json') {
+          const json = JSON.parse(file.contents.toString());
+          expect(json.blog.posts['oakland-activist']);
+        }
       })
       .on('finish', done);
   });

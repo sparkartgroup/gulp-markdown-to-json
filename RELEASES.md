@@ -8,10 +8,12 @@
 
 Other updates:
 
+- [#13] Parser errors are caught and emitted to the stream
 - [#11] Extracted titles no longer removed automatically. Opt-in with `stripTitles: true`.
 - [#10] New title extraction method does not affect newlines
 - [#6, #9] Add optional transform function for changing JSON data
 
+[#13]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/13
 [#11]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/11
 [#10]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/10
 [#6]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/6

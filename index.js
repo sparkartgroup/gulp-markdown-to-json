@@ -1,82 +1,105 @@
 const assign = require('lodash.assign');
 const gutil = require('gulp-util');
+const expand = require('expand-hash');
 const extend = require('util-extend');
+const isTextOrBinary = require('istextorbinary');
+const frontmatter = require('front-matter');
+const Path = require('path');
 const sort = require('sort-object');
 const through = require('through2');
-
-const expand = require('expand-hash');
-const frontmatter = require('front-matter');
 
 const NAME = 'gulp-markdown-to-json';
 const PluginError = gutil.PluginError;
 
+module.exports = markdownToJSON;
+
 /**
  * Parses input Markdown files with given render method(s) and frontmatter with front-matter/js-yaml
  *
- * @param {stream} transform stream of Vinyl file objects
- * @param {function} (renderer, [name], [transform]|config) - Markdown function and optional name, transform function (or a configuration object)
- * @param {function} config.renderer - takes a string of Markdown and returns HTML.
- * @param {object} config.context - call the renderer with the specified context for `this`
- * @param {boolean} config.stripTitle - strips the first `<h1>` element found, if extracted as title property
- * @param {function} (data, file) config.transform - a chance to modify the data for each file before outputting
- * @returns transform stream of JSON as Vinyl file objects
+ * @param {stream.Transform} transform stream of Vinyl file objects
+ * @param {Function} (renderer, [name], [transform]|config) - Markdown function and optional name, transform function (or a configuration object)
+ * @param {Function} config.renderer - takes a string of Markdown and returns HTML.
+ * @param {Object} config.context - call the renderer with the specified context for `this`
+ * @param {Boolean} config.stripTitle - strips the first `<h1>` element found, if extracted as title property
+ * @param {Function} (data, file) config.transform - a chance to modify the data for each file before outputting
+ * @returns {stream.Transform} of JSON as Vinyl file objects
  */
 
-var stream;
+var config;
 
-module.exports = function (config, name, transform) {
-  if (typeof config === 'function') {
-    var config = {
-      renderer: config,
+function markdownToJSON (configArg, name, transform) {
+  if (typeof configArg === 'function') {
+    config = {
+      renderer: configArg
     };
 
     if (typeof name === 'string') config.name = name;
     if (typeof name === 'function') config.transform = name;
     if (typeof transform === 'function') config.transform = transform;
+  } else {
+    config = configArg;
   }
 
-  config.flatten = false; // ensure default, if config has been mutated
+  const stream = through.obj(function (input, enc, callback) {
+    if (!config.renderer || typeof config.renderer !== 'function') return callback(pluginError('Markdown renderer function required'));
 
-  stream = through.obj(function (input, enc, callback) {
-    if (!config.renderer || typeof config.renderer !== 'function') return this.emit('error', log('Markdown renderer function required'));
+    const isBuffered = Array.isArray(input); // as created by gulp-util.buffer
 
-    var file;
+    const queue = (isBuffered)
+      ? input.map(file => isBinary(file))
+      : [isBinary(input)];
 
-    if (Array.isArray(input)) {
+    Promise.all(queue)
+      .then(files => Promise.resolve(files.filter(file => file.isText)))
+      .then(files => Promise.all(files.map(file => toJSON(file))))
+      .then(files => {
+        if (isBuffered) return consolidateFiles(files);
+        files.forEach(file => stream.push(file));
+        return callback();
+      })
+      .then(consolidatedFile => {
+        if (consolidatedFile) callback(null, consolidatedFile);
+      })
+      .catch(err => callback(pluginError(err)));
+  });
+
+  return stream;
+}
+
+/**
+ * Consolidates JSON output into a single object whose structure matches the input directory structure
+ *
+ * @param {Array} files - JSON output as Vinyl file objects
+ * @returns {Promise.<Vinyl>}
+ */
+
+function consolidateFiles (files) {
+  return Promise.resolve(files)
+    .then(files => {
       var data = {};
 
-      input.forEach(file => {
-        const fileData = JSON.parse(toJSON(file, config).contents.toString());
-        data = extend(fileData, data);
+      files.forEach(file => {
+        const path = file.relative.split('.').shift().replace(/[\/\\]/g, '.');
+        data[path] = JSON.parse(file.contents.toString());
       });
 
       const tree = sort(expand(data));
-
       const json = JSON.stringify(tree);
 
-      file = new gutil.File({
+      return Promise.resolve(new gutil.File({
         base: '/',
         cwd: '/',
         path: '/' + (config.name || 'content.json'),
         contents: new Buffer(json)
-      });
-    } else {
-      config.flatten = true;
-      file = toJSON(input, config);
-    }
-
-    this.push(file);
-    callback();
-  });
-
-  return stream;
-};
+      }));
+    });
+}
 
 /**
  * Extracts title text from first <h1> found in rendered markup
- * @param {string} markup
- * @param {boolean} strip - removes the first <h1> from the body
- * @returns title text and body, if title was stripped
+ * @param {String} markup
+ * @param {Boolean} strip - removes the first <h1> from the body when true
+ * @returns {title: String, <body: String>}
  * @private
  */
 
@@ -95,48 +118,71 @@ function extractTitle (markup, strip) {
 }
 
 /**
- * Parses frontmatter with front-matter/js-yaml
- * @param {object} file - Vinyl file object
- * @param {object} config
- * @returns JSON wrapped in a Vinyl file object
+ * Tests if file content is ASCII
+ * @param {Vinyl} file - Vinyl file object
+ * @returns {Promise.<boolean>}
  * @private
  */
 
-function toJSON (file, config) {
-  if (file.isNull()) return;
-  if (file.isStream()) return stream.emit('error', log('Streaming not supported'));
-  if (!file.isBuffer()) return; // skip folders
+function isBinary (file) {
+  return new Promise((resolve, reject) => {
+    isTextOrBinary.isText(Path.basename(file.path), file.contents, (err, isText) => {
+      if (err) return reject(err);
+      if (isText) file.isText = true;
+      resolve(file);
+    });
+  });
+}
 
-  const path = file.relative.split('.').shift().replace(/[\/\\]/g, '.');
-  const parsed = frontmatter(file.contents.toString());
+/**
+ * Parse text files for YAML and Markdown, render to HTML and wrap in JSON
+ * @param {Vinyl} file - Vinyl file object
+ * @returns {Promise.<Vinyl>}
+ * @private
+ */
 
-  var data = {};
-  data[path] = parsed.attributes;
-  data[path].body = config.renderer.call(config.context, parsed.body);
+function toJSON (file) {
+  return Promise.resolve(file)
+    // parse YAML
+    .then(file => {
+      try {
+        const parsed = frontmatter(file.contents.toString());
+        return Promise.resolve(parsed);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    // parse and render Markdown
+    }).then(parsed => {
+      try {
+        const data = parsed.attributes;
+        data.body = config.renderer.call(config.context, parsed.body);
+        return Promise.resolve(data);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    // optional transforms and output
+    }).then(data => {
+      if (!data.title) {
+        const extracted = extractTitle(data.body, config.stripTitle);
+        if (typeof extracted === 'object') data = assign(data, extracted);
+      }
 
-  if (!data[path].title) {
-    const extracted = extractTitle(data[path].body, config.stripTitle);
-    if (typeof extracted === 'object') data[path] = assign(data[path], extracted);
-  }
+      if (config.transform) data = config.transform(data, file);
 
-  // user-defined transform step
-  if (config.transform) data[path] = config.transform(data[path], file);
+      file.path = gutil.replaceExtension(file.path, '.json');
+      file.contents = new Buffer(JSON.stringify(data));
 
-  // internal option: removes path from object if outputting multiple files
-  if (config.flatten) data = data[path];
-
-  file.path = gutil.replaceExtension(file.path, '.json');
-  file.contents = new Buffer(JSON.stringify(data));
-
-  return file;
+      return Promise.resolve(file);
+    });
 }
 
 /**
  * PluginError wrapper
- * @param {string} Error message
+ * @param {String} Error message
+ * @returns {PluginError}
  * @private
  */
 
-function log (message) {
+function pluginError (message) {
   return new PluginError(NAME, message);
 }
