@@ -18,8 +18,9 @@ module.exports = markdownToJSON;
  *
  * @param {stream.Transform} transform stream of Vinyl file objects
  * @param {Function} (renderer, [name], [transform]|config) - Markdown function and optional name, transform function (or a configuration object)
- * @param {Function} config.renderer - takes a string of Markdown and returns HTML.
+ * @param {Function} config.renderer - takes a string of Markdown and returns HTML
  * @param {Object} config.context - call the renderer with the specified context for `this`
+ * @param {Boolean} config.flattenIndex - unwrap files named `index` or the same as parent dirs (consolidated output only)
  * @param {Boolean} config.stripTitle - strips the first `<h1>` element found, if extracted as title property
  * @param {Function} (data, file) config.transform - a chance to modify the data for each file before outputting
  * @returns {stream.Transform} of JSON as Vinyl file objects
@@ -85,8 +86,16 @@ function consolidateFiles (files) {
       var data = {};
 
       files.forEach(file => {
-        const path = file.relative.split('.').shift().replace(/[\/\\]/g, '.');
-        data[path] = JSON.parse(file.contents.toString());
+        var path = file.relative.split('.').shift().split(Path.sep);
+
+        if (path.length >= 2 && config.flattenIndex) {
+          var relPath = path.splice(-2, 2);
+          path = (relPath[0] === relPath[1] || relPath[1] === 'index')
+            ? path.concat(relPath[0])
+            : path.concat(relPath);
+        }
+
+        data[path.join('.')] = JSON.parse(file.contents.toString());
       });
 
       const tree = sort(expand(data));

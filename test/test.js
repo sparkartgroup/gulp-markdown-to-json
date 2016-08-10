@@ -136,7 +136,7 @@ lab.experiment('Arguments API', () => {
   var config;
 
   lab.beforeEach(done => {
-    config = testConfigs['marked'];
+    config = testConfigs.marked;
     done();
   });
 
@@ -187,7 +187,7 @@ lab.experiment('Title extraction', () => {
   var config;
 
   lab.beforeEach(done => {
-    config = testConfigs['marked'];
+    config = testConfigs.marked;
     done();
   });
 
@@ -257,7 +257,7 @@ lab.experiment('Title stripping', () => {
 
   lab.beforeEach(done => {
     config = {
-      renderer: testConfigs['marked'],
+      renderer: testConfigs.marked,
       stripTitle: true
     };
     done();
@@ -266,7 +266,7 @@ lab.experiment('Title stripping', () => {
   lab.test('does nothing if stripTitle option is unspecified', done => {
     const fixture = new Vinyl(fixtureConfig.atxHeading);
 
-    markdown(testConfigs['marked'])
+    markdown(testConfigs.marked)
       .on('data', file => {
         const json = JSON.parse(file.contents.toString());
         expect(json.body).toInclude('<h1 id="titulus">Titulus</h1>');
@@ -306,7 +306,7 @@ lab.experiment('Transform function', () => {
 
   lab.beforeEach(done => {
     config = {
-      renderer: testConfigs['marked'],
+      renderer: testConfigs.marked,
       transform: (data, file) => {
         delete data.body;
         data.path = file.path;
@@ -349,7 +349,7 @@ lab.experiment('Output', () => {
   var config;
 
   lab.beforeEach(done => {
-    config = config = testConfigs['marked'];
+    config = config = testConfigs.marked;
     done();
   });
 
@@ -359,7 +359,7 @@ lab.experiment('Output', () => {
       .pipe(gutil.buffer())
       .on('data', files => {
         const jsonFiles = files.filter(file => Path.extname(file.path) === '.json');
-        expect(jsonFiles.length).toEqual(4);
+        expect(jsonFiles.length).toEqual(5);
       })
       .on('finish', done);
   });
@@ -388,7 +388,7 @@ lab.experiment('Output', () => {
         expect(err.message).toEqual('invalid.json is not valid JSON');
         done();
       })
-      .write([json, invalidJSON])
+      .write([json, invalidJSON]);
   });
 
   lab.test('consolidates output into a single file if buffered with gulp-util', done => {
@@ -420,6 +420,40 @@ lab.experiment('Output', () => {
       .on('data', file => {
         if (file && file.basename === 'content.json') {
           const json = JSON.parse(file.contents.toString());
+          expect(json.blog.posts['oakland-activist']);
+        }
+      })
+      .on('finish', done);
+  });
+
+  lab.test('merges files named "index" with parent directories in consolidated output', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown({
+        renderer: testConfigs.marked,
+        flattenIndex: true
+      }))
+      .on('data', file => {
+        if (file && file.basename === 'content.json') {
+          const json = JSON.parse(file.contents.toString());
+          expect(json.blog.posts.title).toEqual('Archive');
+          expect(json.blog.posts['oakland-activist']);
+        }
+      })
+      .on('finish', done);
+  });
+
+  lab.test('merges like-named files with parent directories in consolidated output', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown({
+        renderer: testConfigs.marked,
+        flattenIndex: true
+      }))
+      .on('data', file => {
+        if (file && file.basename === 'content.json') {
+          const json = JSON.parse(file.contents.toString());
+          expect(json.blog.title);
           expect(json.blog.posts['oakland-activist']);
         }
       })

@@ -123,6 +123,10 @@ gulp.task('markdown', () => {
 ```json
 {
   "blog": {
+    "blog": {
+      "title": "ipsum dipsum",
+      "body": "<p>From west to "east"!</p>"
+    },
     "posts": {
       "bushwick-artisan": {
         "slug": "bushwick-artisan",
@@ -137,6 +141,25 @@ gulp.task('markdown', () => {
   }
 }
 ```
+
+Specify `flattenIndex: true` in the config object to unwrap home page/index-style content and merge it into the parent object. Name these files `index` or the same as a parent directory.
+
+```json
+{
+  "blog": {
+    "title": "ipsum dipsum",
+    "body": "<p>From west to "east"!</p>"
+    "posts": {
+      ...
+    }
+  },
+  "mission": {
+    ...
+  }
+}
+```
+
+This avoids redundant-feeling `blog.blog` scenarios when iterating and selecting from this content.
 
 ### Title Extraction and Stripping
 
@@ -190,6 +213,7 @@ API
 - `render` `Function` accepts Markdown source string, returns an escaped HTML string. **Required**
 - `context` `Object` to use when calling `render`
 - `name` `String` to rename consolidated output file, if using. Default: `content.json`
+- `flattenIndex` `Boolean` unwrap files named `index` or after parent dirs in consolidated output. Default: `false`
 - `stripTitle` `Boolean` strips the first `<h1>` from body, if extracted as title. Default: `false`
 - `transform` `Function` to access and change the JSON data for each file before outputting
 
