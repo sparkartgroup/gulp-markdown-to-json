@@ -20,10 +20,11 @@
   },
   "scripts": {
     "lint": "semistandard **/*.js",
-    "test": "lab -lv"
+    "test": "lab -lv lib/plugin.test.js"
   },
+	"main": "lib/plugin.js",
   "files": [
-    "index.js"
+    "lib/plugin.js"
   ],
   "keywords": [
     "algolia",
