@@ -74,6 +74,14 @@ const fixtureConfig = {
   invalidYAML: {
     path: 'fixture.md',
     contents: new Buffer('---\ntitle: "lipsum "fragor" ipsum"\n---\n*"dipsum"*')
+  },
+  json: {
+    path: 'fixture.json',
+    contents: new Buffer('"{ \\"title\\": \\"ipsum blog\\", \\"description\\": \\"Typewriter put a bird on it\\" }"')
+  },
+  invalidJSON: {
+    path: 'invalid.json',
+    contents: new Buffer('"{ \\"title\\"')
   }
 };
 
@@ -166,7 +174,7 @@ lab.experiment('Arguments API', () => {
         return data;
       }))
       .on('data', file => {
-        if (file.name === 'content.json') {
+        if (file.basename === 'content.json') {
           expect(JSON.parse(file.contents.toString()).blog.blog.test).toEqual(true);
           expect(Path.basename(file.path)).toEqual('content.json');
         }
@@ -351,9 +359,36 @@ lab.experiment('Output', () => {
       .pipe(gutil.buffer())
       .on('data', files => {
         const jsonFiles = files.filter(file => Path.extname(file.path) === '.json');
-        expect(jsonFiles.length).toEqual(3);
+        expect(jsonFiles.length).toEqual(4);
       })
       .on('finish', done);
+  });
+
+  lab.test('passthrough existing JSON files', done => {
+    vfs.src(fixturePath)
+      .pipe(markdown(config))
+      .pipe(gutil.buffer())
+      .on('data', files => {
+        const jsonFiles = files.filter(file => Path.basename(file.path) === 'site.json');
+        expect(jsonFiles.length).toEqual(1);
+      })
+      .on('finish', done);
+  });
+
+  lab.test('skip and flag invalid JSON files', done => {
+    const json = new Vinyl(fixtureConfig.json);
+    const invalidJSON = new Vinyl(fixtureConfig.invalidJSON);
+
+    markdown(config)
+      .on('data', file => {
+        expect(Path.basename(file.path)).toEqual('content.json');
+      })
+      .on('error', err => {
+        expect(err instanceof PluginError).toBe(true);
+        expect(err.message).toEqual('invalid.json is not valid JSON');
+        done();
+      })
+      .write([json, invalidJSON])
   });
 
   lab.test('consolidates output into a single file if buffered with gulp-util', done => {
@@ -383,9 +418,22 @@ lab.experiment('Output', () => {
       .pipe(gutil.buffer())
       .pipe(markdown(config))
       .on('data', file => {
-        if (file && file.name === 'content.json') {
+        if (file && file.basename === 'content.json') {
           const json = JSON.parse(file.contents.toString());
           expect(json.blog.posts['oakland-activist']);
+        }
+      })
+      .on('finish', done);
+  });
+
+  lab.test('consolidated output includes passthrough JSON', done => {
+    vfs.src(fixturePath)
+      .pipe(gutil.buffer())
+      .pipe(markdown(config))
+      .on('data', file => {
+        if (file && file.basename === 'content.json') {
+          const json = JSON.parse(file.contents.toString());
+          expect(json.blog.site.title);
         }
       })
       .on('finish', done);

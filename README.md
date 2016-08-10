@@ -72,7 +72,7 @@ gulp.task('markdown', () => {
 });
 ```
 
-Transformed source files flow onward to the destination of your choice with directory structure preserved:
+Transformed source files flow onward to the destination of your choice with directory structure preserved. Any valid JSON files matched by your `gulp.src` glob passthrough.
 
 **`/blog/posts/bushwick-artisan.md`**
 
@@ -100,7 +100,7 @@ Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickle
 
 ### Consolidated Output
 
-Gather Markdown files before piping with the [gulp-util buffer method][gulp-util] to combine output into a single JSON file. Directory structure is preserved and represented as nested JSON for iteration with [Handlebars.js][handlebars-iterate] and friends. This is handy for navigation and other global content.
+Gather Markdown files before piping with the [gulp-util buffer method][gulp-util] to combine output into a single JSON file. Directory structure is preserved and represented as nested JSON for iteration with [Handlebars.js][handlebars-iterate] and friends. This is handy for navigation and other global content. Valid JSON files are included in the object if matched by your `gulp.src` glob.
 
 The consolidated file is named **`content.json`** by default and optionally renamed.
 

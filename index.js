@@ -53,12 +53,18 @@ function markdownToJSON (configArg, name, transform) {
       .then(files => Promise.resolve(files.filter(file => file.isText)))
       .then(files => Promise.all(files.map(file => toJSON(file))))
       .then(files => {
-        if (isBuffered) return consolidateFiles(files);
-        files.forEach(file => stream.push(file));
-        return callback();
+        const invalidFiles = files.filter(file => file.isInvalid);
+        const validFiles = files.filter(file => !file.isInvalid);
+
+        invalidFiles.forEach(file => stream.emit('error', pluginError(`${Path.basename(file.basename)} is not valid JSON`)));
+
+        if (isBuffered) return consolidateFiles(validFiles);
+
+        validFiles.forEach(file => stream.push(file));
       })
       .then(consolidatedFile => {
-        if (consolidatedFile) callback(null, consolidatedFile);
+        if (consolidatedFile) stream.push(consolidatedFile);
+        callback();
       })
       .catch(err => callback(pluginError(err)));
   });
@@ -135,6 +141,22 @@ function isBinary (file) {
 }
 
 /**
+ * Tests if file content is valid JSON
+ * @param {object} Vinyl file
+ * @returns {boolean}
+ * @private
+ */
+
+function isJSON (file) {
+  try {
+    JSON.parse(file.contents.toString());
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
  * Parse text files for YAML and Markdown, render to HTML and wrap in JSON
  * @param {Vinyl} file - Vinyl file object
  * @returns {Promise.<Vinyl>}
@@ -142,6 +164,11 @@ function isBinary (file) {
  */
 
 function toJSON (file) {
+  if (Path.extname(file.path) === '.json') {
+    if (!isJSON(file)) file.isInvalid = true;
+    return Promise.resolve(file);
+  }
+
   return Promise.resolve(file)
     // parse YAML
     .then(file => {
