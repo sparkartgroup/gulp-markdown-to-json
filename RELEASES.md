@@ -13,6 +13,7 @@ Other updates:
 - [#10] New title extraction method does not affect newlines
 - [#6, #9] Add optional transform function for changing JSON data
 - [#7] Add config option to unwrap files named `index` or the same as parent dirs (consolidated output only)
+- Add `updatedAt` to output, the file modified time from fs.Stat, as an ISO 8601 string
 
 [#13]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/13
 [#11]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/11
