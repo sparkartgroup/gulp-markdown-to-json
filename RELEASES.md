@@ -2,7 +2,7 @@
 
 ## [v1.0.0]
 
-> Unreleased
+> August 25, 2016
 
 **Breaking:** this plugin is no longer a wrapper, parsing and rendering is left to the user. Bring Your Own Markdown! The plugin will focus on the JSON output.
 

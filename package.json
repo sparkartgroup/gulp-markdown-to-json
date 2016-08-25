@@ -1,6 +1,6 @@
 {
   "name": "gulp-markdown-to-json",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Parse Markdown + YAML, compile Markdown to HTML, wrap it in JSON.",
   "license": "MIT",
   "bugs": {
@@ -22,7 +22,7 @@
     "lint": "semistandard **/*.js",
     "test": "lab -lv lib/plugin.test.js"
   },
-	"main": "lib/plugin.js",
+  "main": "lib/plugin.js",
   "files": [
     "lib/plugin.js"
   ],
