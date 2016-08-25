@@ -233,8 +233,8 @@ License
 **[MIT](LICENSE)**  
 Copyright &copy; 2016 Sparkart Group, Inc.
 
-[circleci]: https://circleci.com/gh/SparkartGroupInc/gulp-markdown-to-json
-[circleci-badge]: https://circleci.com/gh/SparkartGroupInc/gulp-markdown-to-json.png?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25
+[circleci]: https://circleci.com/gh/sparkartgroup/gulp-markdown-to-json
+[circleci-badge]: https://circleci.com/gh/sparkartgroup/gulp-markdown-to-json.png?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25
 
 [semistandard]: https://github.com/Flet/semistandard
 [semistandard-badge]: https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg?style=flat
