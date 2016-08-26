@@ -30,9 +30,9 @@ This plugin does not bundle any Markdown parser to keep your options open. BYOM!
 
 Pick one of these or write a new parser for fun!
 
-- [commonmark.js][commonmark.js] ← the best
-- [markdown-it][markdown-it]
+- [commonmark.js][commonmark.js]
 - [markdown-js][markdown-js]
+- [markdown-it][markdown-it] ← the best
 - [marked][marked]
 - [remark][remark]
 - [remarkable][remarkable]
