@@ -1,6 +1,6 @@
 {
   "name": "gulp-markdown-to-json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse Markdown + YAML, compile Markdown to HTML, wrap it in JSON.",
   "license": "MIT",
   "bugs": {

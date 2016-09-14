@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v1.0.1]
+
+> September 14, 2016
+
+- [#16] Deeply sort path keys in consolidated output
+
 ## [v1.0.0]
 
 > August 25, 2016
@@ -35,6 +41,7 @@ _Hey!! There's a guy coming out of the cave!_
 
 _Pre-release_
 
+[#16]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/16
 [#13]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/13
 [#11]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/11
 [#10]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/10
@@ -43,6 +50,7 @@ _Pre-release_
 [#9]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/9
 [#5]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/5
 
+[v1.0.1]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.4.0...v1.0.0
 [v0.4.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.2.0...v0.3.0
