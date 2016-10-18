@@ -208,6 +208,12 @@ gulp.src('./content/**/*.md')
   .pipe(gulp.dest('.'))
 ```
 
+### Errors / Debugging
+
+Parsing errors are caught and emitted with the global [gulplog][gulplog] logger. This requires gulp 3.7+ or 4+ and [gulp-cli][gulp-cli]. Specify the `LLLL` log level for raw parser error output for debugging.
+
+**Important:** including `on` listeners in your pipeline, plugins like gulp-plumber, and other older error handling methods will not work.
+
 API
 ---
 
@@ -254,6 +260,8 @@ Copyright &copy; 2016 Sparkart Group, Inc.
 [plugin]: https://git.io/v6t5d
 
 [gulp-util]: https://github.com/gulpjs/gulp-util#buffercb
+[gulp-cli]: https://www.npmjs.com/package/gulp-cli
+
 [handlebars-iterate]: http://handlebarsjs.com/#iteration
 
 [vinyl]: https://github.com/gulpjs/vinyl
