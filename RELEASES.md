@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v1.0.3]
+
+> February 6, 2017
+
+- Use strict mode to maintain node 4.x support (usage of let)
+
 ## [v1.0.2]
 
 > February 6, 2017
@@ -58,6 +64,7 @@ _Pre-release_
 [#9]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/9
 [#5]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/5
 
+[v1.0.3]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.1...v1.0.3
 [v1.0.2]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.4.0...v1.0.0
