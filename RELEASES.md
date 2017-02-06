@@ -1,5 +1,12 @@
 # Release Notes
 
+## [v1.0.2]
+
+> February 6, 2017
+
+- [#19] Fixes issues related to plugin config cached with the module
+- Clones Vinyl files before manipulation, to avoid mutation
+
 ## [v1.0.1]
 
 > September 14, 2016
@@ -41,6 +48,7 @@ _Hey!! There's a guy coming out of the cave!_
 
 _Pre-release_
 
+[#19]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/19
 [#16]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/16
 [#13]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/13
 [#11]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/11
@@ -50,6 +58,7 @@ _Pre-release_
 [#9]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/9
 [#5]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/5
 
+[v1.0.2]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.4.0...v1.0.0
 [v0.4.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.3.0...v0.4.0
