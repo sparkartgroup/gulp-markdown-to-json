@@ -215,7 +215,7 @@ API
 
 `config`
 
-- `render` `Function` accepts Markdown source string, returns an escaped HTML string. **Required**
+- `renderer` `Function` accepts Markdown source string, returns an escaped HTML string. **Required**
 - `context` `Object` to use when calling `render`
 - `name` `String` to rename consolidated output file, if using. Default: `content.json`
 - `flattenIndex` `Boolean` unwrap files named `index` or after parent dirs in consolidated output. Default: `false`
