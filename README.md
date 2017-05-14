@@ -37,7 +37,7 @@ Pick one of these or write a new parser for fun!
 - [remark][remark]
 - [remarkable][remarkable]
 
-Install, configure, and pass a rendering method to this plugin with a source string as it’s first argument. Output goes straight into the JSON file’s `body` property. If your parser requires instantiation pass a context to call it with by defining `context` in the config object. If yet more hoop jumping is required, write a wrapper function such as this example for remark:
+Install, configure, and pass a rendering method to this plugin with a source string as its first argument. Output goes straight into the JSON file’s `body` property. If your parser requires instantiation pass a context to call it with by defining `context` in the config object. If yet more hoop jumping is required, write a wrapper function such as this example for remark:
 
 ```js
 function render (string) {
