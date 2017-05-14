@@ -211,12 +211,12 @@ gulp.src('./content/**/*.md')
 API
 ---
 
-### `markdownToJSON((render: Function, name?: String, transform?: Function) | config: Object) => TransformStream`
+### `markdownToJSON((renderer: Function, name?: String, transform?: Function) | config: Object) => TransformStream`
 
 `config`
 
 - `renderer` `Function` accepts Markdown source string, returns an escaped HTML string. **Required**
-- `context` `Object` to use when calling `render`
+- `context` `Object` to use when calling `renderer`
 - `name` `String` to rename consolidated output file, if using. Default: `content.json`
 - `flattenIndex` `Boolean` unwrap files named `index` or after parent dirs in consolidated output. Default: `false`
 - `stripTitle` `Boolean` strips the first `<h1>` from body, if extracted as title. Default: `false`
@@ -231,7 +231,7 @@ License
 -------
 
 **[MIT](LICENSE)**  
-Copyright &copy; 2016 Sparkart Group, Inc.
+Copyright &copy; 2017 Sparkart Group, Inc.
 
 [circleci]: https://circleci.com/gh/sparkartgroup/gulp-markdown-to-json
 [circleci-badge]: https://circleci.com/gh/sparkartgroup/gulp-markdown-to-json.png?style=shield&circle-token=8bf33da398b8ab296fe670c81b3fecbae1471e25
