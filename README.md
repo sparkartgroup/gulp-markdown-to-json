@@ -94,7 +94,7 @@ Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickle
   "slug": "bushwick-artisan",
   "title": "Wes Anderson pop-up Bushwick artisan",
   "layout": "centered",
-  "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
+  "body": "<h2 id=\"yolo\">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
   "updatedAt": "1970-01-01T00:00:00Z"
 }
 ```
@@ -126,7 +126,7 @@ gulp.task('markdown', () => {
   "blog": {
     "blog": {
       "title": "ipsum dipsum",
-      "body": "<p>From west to "east"!</p>",
+      "body": "<p>From west to \"east\"!</p>",
       "updatedAt": "1970-01-01T00:00:00Z"
     },
     "posts": {
@@ -134,7 +134,7 @@ gulp.task('markdown', () => {
         "slug": "bushwick-artisan",
         "title": "Wes Anderson pop-up Bushwick artisan", 
         "layout": "centered",
-        "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
+        "body": "<h2 id=\"yolo\">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
         "updatedAt": "1970-01-01T00:00:00Z"
       }
     }
@@ -151,7 +151,7 @@ Specify `flattenIndex: true` in the config object to unwrap home page/index-styl
 {
   "blog": {
     "title": "ipsum dipsum",
-    "body": "<p>From west to "east"!</p>"
+    "body": "<p>From west to \"east\"!</p>",
     "updatedAt": "1970-01-01T00:00:00Z",
     "posts": {
       ...
@@ -186,7 +186,7 @@ Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickle
 ```json
 {
   "title": "Wes Anderson pop-up Bushwick artisan", 
-  "body": "<h2 id="yolo">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
+  "body": "<h2 id=\"yolo\">YOLO</h2>\n<p>Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickled post-ironic. Plaid ugh vegan, Sixpoint 8-bit sartorial artisan semiotics put a bird on it Mission bicycle rights Club-Mate vinyl.</p>",
   "updatedAt": "1970-01-01T00:00:00Z"
 }
 ```
