@@ -1,5 +1,11 @@
 # Release Notes
 
+## [v1.1.0]
+
+> March 18, 2018
+
+- Remove gulp-util and replace with [direct module dependencies][gulp-util]
+
 ## [v1.0.3]
 
 > February 6, 2017
@@ -64,6 +70,7 @@ _Pre-release_
 [#9]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/9
 [#5]: https://github.com/sparkartgroup/gulp-markdown-to-json/issues/5
 
+[v1.1.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.3...v1.1.0
 [v1.0.3]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.1...v1.0.3
 [v1.0.2]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v1.0.0...v1.0.1
@@ -71,3 +78,5 @@ _Pre-release_
 [v0.4.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/sparkartgroup/gulp-markdown-to-json/compare/4dc86c3...v0.2.1
+
+[gulp-util]: https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5
