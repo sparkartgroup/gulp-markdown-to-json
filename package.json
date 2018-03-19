@@ -47,7 +47,6 @@
   "dependencies": {
     "expand-hash": "^0.2.1",
     "front-matter": "^2.1.0",
-    "gulp-util": "^3.0.7",
     "istextorbinary": "^2.1.0",
     "list-stream": "^1.0.1",
     "lodash.assign": "^4.1.0",
