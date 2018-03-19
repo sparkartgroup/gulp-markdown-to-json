@@ -101,19 +101,19 @@ Chia quinoa meh, you probably haven't heard of them sartorial Holowaychuk pickle
 
 ### Consolidated Output
 
-Gather Markdown files before piping with the [gulp-util buffer method][gulp-util] to combine output into a single JSON file. Directory structure is preserved and represented as nested JSON for iteration with [Handlebars.js][handlebars-iterate] and friends. This is handy for navigation and other global content. Valid JSON files are included in the object if matched by your `gulp.src` glob.
+Gather Markdown files before piping with [list-stream][] to combine output into a single JSON file. Directory structure is preserved and represented as nested JSON for iteration with [Handlebars.js][handlebars-iterate] and friends. This is handy for navigation and other global content. Valid JSON files are included in the object if matched by your `gulp.src` glob.
 
 The consolidated file is named **`content.json`** by default and optionally renamed.
 
 ```javascript
 const gulp = require('gulp');
-const gutil = require('gulp-util');
+const ListStream = require('list-stream');
 const markdownToJSON = require('gulp-markdown-to-json');
 const marked = require('marked');
 
 gulp.task('markdown', () => {
   gulp.src('./content/**/*.md')
-    .pipe(gutil.buffer())
+    .pipe(ListStream.obj())
     .pipe(markdownToJSON(marked, 'blog.json'))
     .pipe(gulp.dest('.'))
 });
@@ -199,7 +199,7 @@ For example:
 
 ```js
 gulp.src('./content/**/*.md')
-  .pipe(gutil.buffer())
+  .pipe(ListStream.obj())
   .pipe(markdownToJSON(marked, 'blog.json', (data, file) => {
     delete data.body;
     data.path = file.path;
@@ -253,7 +253,7 @@ Copyright &copy; 2017 Sparkart Group, Inc.
 [contentful]: https://www.contentful.com
 [plugin]: https://git.io/v6t5d
 
-[gulp-util]: https://github.com/gulpjs/gulp-util#buffercb
+[list-stream]: https://github.com/rvagg/list-stream
 [handlebars-iterate]: http://handlebarsjs.com/#iteration
 
 [vinyl]: https://github.com/gulpjs/vinyl
