@@ -62,7 +62,7 @@
     "lab": "^10.9.0",
     "markdown": "^0.5.0",
     "markdown-it": "^7.0.0",
-    "marked": "^0.3.6",
+    "marked": "^4.0.10",
     "remark": "^5.0.1",
     "remark-html": "^5.0.0",
     "remarkable": "^1.6.2",
